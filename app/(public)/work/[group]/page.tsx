@@ -55,7 +55,6 @@ export default async function GroupPage({ params }: Props) {
   );
 }
 
-export async function generateStaticParams() {
-  const groups = await prisma.group.findMany({ select: { slug: true } });
-  return groups.map((g) => ({ group: g.slug }));
-}
+// Database lives in /tmp on Vercel (runtime only) — cannot query at build time.
+// All group pages are rendered on-demand at request time.
+export const dynamic = "force-dynamic";
