@@ -96,8 +96,8 @@ export async function initDb() {
         }
       }
     }
-  } catch {
+  } catch (err) {
     // Non-fatal: log and continue. App will still render, admin login may fail.
-    console.warn("[initDb] Database initialization failed");
+    console.error("[initDb] Database initialization failed:", err);
   }
 }
