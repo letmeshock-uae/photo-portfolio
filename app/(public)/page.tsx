@@ -1,3 +1,6 @@
+// Database lives in /tmp on Vercel (runtime only) — cannot query at build time.
+export const dynamic = "force-dynamic";
+
 import { prisma } from "@/lib/prisma";
 import { parseTags, parseMetadata } from "@/lib/utils";
 import { HomeClient } from "./HomeClient";
