@@ -60,56 +60,51 @@ export async function initDb() {
 
   try {
     const { prisma } = await import("@/lib/prisma");
-
-    const tableCheck = await prisma.$queryRawUnsafe<{ count: number }[]>(
-      `SELECT COUNT(*) as count FROM sqlite_master WHERE type='table' AND name='User'`
-    );
-
-    if (tableCheck[0]?.count === 0) {
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "User" (
-          "id" TEXT NOT NULL PRIMARY KEY,
-          "email" TEXT NOT NULL UNIQUE,
-          "passwordHash" TEXT NOT NULL,
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "Group" (
-          "id" TEXT NOT NULL PRIMARY KEY,
-          "name" TEXT NOT NULL,
-          "slug" TEXT NOT NULL UNIQUE,
-          "defaultView" TEXT NOT NULL DEFAULT 'grid',
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-      `);
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "Photo" (
-          "id" TEXT NOT NULL PRIMARY KEY,
-          "url" TEXT NOT NULL,
-          "thumbnailUrl" TEXT NOT NULL,
-          "title" TEXT,
-          "description" TEXT,
-          "tags" TEXT NOT NULL DEFAULT '[]',
-          "metadata" TEXT NOT NULL DEFAULT '{}',
-          "groupId" TEXT,
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL
-        )
-      `);
-      await prisma.$executeRawUnsafe(`
-        CREATE TABLE IF NOT EXISTS "Log" (
-          "id" TEXT NOT NULL PRIMARY KEY,
-          "userId" TEXT NOT NULL,
-          "action" TEXT NOT NULL,
-          "details" TEXT,
-          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY ("userId") REFERENCES "User"("id")
-        )
-      `);
-    }
-
     const { randomUUID } = await import("crypto");
+
+    // CREATE TABLE IF NOT EXISTS is idempotent — safe to run every cold start.
+    // (Checking COUNT(*) first fails because SQLite returns BigInt, not number.)
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "User" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "email" TEXT NOT NULL UNIQUE,
+        "passwordHash" TEXT NOT NULL,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "Group" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "name" TEXT NOT NULL,
+        "slug" TEXT NOT NULL UNIQUE,
+        "defaultView" TEXT NOT NULL DEFAULT 'grid',
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "Photo" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "url" TEXT NOT NULL,
+        "thumbnailUrl" TEXT NOT NULL,
+        "title" TEXT,
+        "description" TEXT,
+        "tags" TEXT NOT NULL DEFAULT '[]',
+        "metadata" TEXT NOT NULL DEFAULT '{}',
+        "groupId" TEXT,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("groupId") REFERENCES "Group"("id") ON DELETE SET NULL
+      )
+    `);
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS "Log" (
+        "id" TEXT NOT NULL PRIMARY KEY,
+        "userId" TEXT NOT NULL,
+        "action" TEXT NOT NULL,
+        "details" TEXT,
+        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY ("userId") REFERENCES "User"("id")
+      )
+    `);
 
     // Ensure admin user exists
     const adminEmail = process.env.ADMIN_EMAIL ?? "admin@portfolio.local";
