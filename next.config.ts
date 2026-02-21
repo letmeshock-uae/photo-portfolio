@@ -1,18 +1,18 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Native modules that must not be bundled by webpack/Turbopack
+  serverExternalPackages: ["sharp", "better-sqlite3", "@prisma/adapter-better-sqlite3"],
+
   images: {
-    // Allow local uploads directory
     localPatterns: [
-      {
-        pathname: "/uploads/**",
-        search: "",
-      },
+      { pathname: "/uploads/**", search: "" },
     ],
-    // Formats to serve
     formats: ["image/webp"],
+    // Allow any origin for production (Vercel Blob, S3, etc.)
+    remotePatterns: [],
   },
-  // Increase body size limit for file uploads (50MB)
+
   experimental: {
     serverActions: {
       bodySizeLimit: "50mb",
