@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import path from "path";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -7,18 +8,18 @@ const globalForPrisma = globalThis as unknown as {
 
 /**
  * Resolve the database URL.
- * - Local dev: uses DATABASE_URL env var (defaults to ./prisma/dev.db)
+ * - Local dev: absolute path to prisma/dev.db relative to this file
  * - Vercel / serverless: writes to /tmp which is the only writable directory
  */
 function resolveDbUrl(): string {
-  const envUrl = process.env.DATABASE_URL;
-
   // On Vercel, the deployed filesystem is read-only. Force /tmp.
   if (process.env.VERCEL === "1") {
     return "file:/tmp/portfolio.db";
   }
 
-  return envUrl ?? "file:./prisma/dev.db";
+  // Use absolute path anchored to project root (Next.js always sets cwd to project root)
+  const absPath = path.resolve(process.cwd(), "prisma/dev.db");
+  return `file:${absPath}`;
 }
 
 function createPrismaClient() {
