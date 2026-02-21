@@ -1,0 +1,24 @@
+erDiagram
+    USER ||--o{ LOG : performs
+    USER {
+        string id PK
+        string email
+        string password_hash
+    }
+    GROUP ||--o{ PHOTO : contains
+    GROUP {
+        string id PK
+        string name
+        string slug
+        string default_view "grid | carousel | wall"
+    }
+    PHOTO {
+        string id PK
+        string url
+        string thumbnail_url
+        string title
+        string description
+        string[] tags
+        json metadata
+        datetime created_at
+    }

@@ -1,0 +1,6 @@
+- Use 'sharp' for all image processing; never serve raw uploads.
+- Every button must have a visual 'pressed' state and a loading spinner if it triggers an async action.
+- Use Framer Motion 'layoutId' for seamless transitions between gallery views.
+- Implement 'next/image' with priority for the first 2 images in any group.
+- All admin forms must use Zod validation with clear error messages.
+- If a photo fails to load, show a geometric placeholder, not a broken link icon.
