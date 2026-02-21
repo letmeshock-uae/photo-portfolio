@@ -9,8 +9,10 @@ const nextConfig: NextConfig = {
       { pathname: "/uploads/**", search: "" },
     ],
     formats: ["image/webp"],
-    // Allow any origin for production (Vercel Blob, S3, etc.)
-    remotePatterns: [],
+    remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "picsum.photos" },
+    ],
   },
 
   experimental: {
